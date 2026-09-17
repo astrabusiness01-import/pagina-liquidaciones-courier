@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquidación de Envío — ASTRA</title>
+<link rel="icon" href="assets/astra-star-mark.webp">
+<style>
+@font-face{
+  font-family:'Manrope';
+  font-style:normal;
+  font-weight:400 800;
+  font-display:swap;
+  src:url('assets/fonts/manrope-variable.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Space Grotesk';
+  font-style:normal;
+  font-weight:500 700;
+  font-display:swap;
+  src:url('assets/fonts/space-grotesk-variable.woff2') format('woff2');
+}
+
+:root{
+  --bg:#0c0906;
+  --bg-2:#14100b;
+  --bg-3:#1e1811;
+  --cream:#f3ecdd;
+  --cream-2:#ddd0b8;
+  --cream-3:#8d7f68;
+  --accent:#f0b400;
+  --accent-2:#b35900;
+  --accent-grad:linear-gradient(135deg,#f1b200,#aa5000);
+  --steel:#8fa3ae;
+  --line:rgba(243,236,221,.12);
+  --danger:#e0563f;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(240,180,0,.08), transparent 60%),
+    var(--bg);
+  color:var(--cream);
+  font-family:'Manrope',sans-serif;
+  padding:40px 16px 120px;
+}
+
+.app-shell{
+  max-width:1000px;
+  width:92%;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+h1,h2,h3,.serif{ font-family:'Space Grotesk',sans-serif; }
+
+/* ---------- Encabezado de página ---------- */
+.page-header{
+  display:flex;
+  justify-content:center;
+  padding:4px 0 6px;
+}
+.page-header-logo{
+  height:130px;
+  width:auto;
+  display:block;
+}
+
+/* ---------- Toolbar (paste + controls) ---------- */
+.toolbar{
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px 22px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.toolbar h2{
+  margin:0;
+  font-size:15px;
+  letter-spacing:.02em;
+  color:var(--cream-2);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.toolbar h2 .step{
+  width:20px;height:20px;
+  border-radius:50%;
+  background:var(--accent-grad);
+  color:var(--bg);
+  font-size:11px;
+  font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+
+.toolbar p.hint{
+  margin:0;
+  font-size:12.5px;
+  color:var(--cream-3);
+  line-height:1.5;
+}
+
+textarea#paste-area{
+  width:100%;
+  min-height:110px;
+  resize:vertical;
+  background:var(--bg-3);
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--cream);
+  font-family:'Manrope',monospace;
+  font-size:13px;
+  padding:12px 14px;
+  outline:none;
+}
+textarea#paste-area:focus{ border-color:var(--accent); }
+textarea#paste-area::placeholder{ color:var(--cream-3); }
+
+.row-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+
+.field-inline{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:var(--cream-2);
+}
+
+/* ---------- Buttons ---------- */
+button{
+  font-family:'Manrope',sans-serif;
+  cursor:pointer;
+}
+
+.btn{
+  border:none;
+  border-radius:999px;
+  padding:10px 18px;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.01em;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.btn:active{ transform:scale(.97); }
+
+.btn-primary{
+  background:var(--accent-grad);
+  color:#1a1006;
+  box-shadow:0 6px 18px rgba(240,180,0,.25);
+}
+.btn-primary:hover{ box-shadow:0 8px 22px rgba(240,180,0,.35); transform:translateY(-1px); }
+
+.btn-ghost{
+  background:transparent;
+  color:var(--cream-2);
+  border:1px solid var(--line);
+}
+.btn-ghost:hover{ border-color:var(--cream-3); color:var(--cream); }
+
+.btn-danger-ghost{
+  background:transparent;
+  color:var(--cream-3);
+  border:1px solid var(--line);
+}
+.btn-danger-ghost:hover{ border-color:var(--danger); color:var(--danger); }
+
+.btn-sm{ padding:6px 12px; font-size:12px; border-radius:8px; }
+
+/* ---------- The invoice card ---------- */
+.card{
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:52px 48px 42px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(500px 200px at 100% 0%, rgba(240,180,0,.06), transparent 60%);
+  pointer-events:none;
+}
+
+.card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:18px;
+  position:relative;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.brand img{
+  height:26px;
+  width:auto;
+  display:block;
+}
+.brand-text{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:27px;
+  letter-spacing:.04em;
+  color:var(--accent);
+}
+
+.doc-meta{
+  text-align:right;
+  font-size:16px;
+  color:var(--cream-3);
+}
+.doc-meta .doc-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:18px;
+  font-weight:600;
+  color:var(--cream);
+  margin-bottom:3px;
+  letter-spacing:.01em;
+}
+.doc-meta .fecha-row{ display:flex; gap:4px; justify-content:flex-end; }
+[contenteditable]{
+  outline:none;
+  border-bottom:1px dashed var(--cream-3);
+  padding-bottom:1px;
+  cursor:text;
+}
+[contenteditable]:hover, [contenteditable]:focus{
+  background:rgba(240,180,0,.08);
+  border-radius:4px;
+  border-bottom-color:var(--accent);
+}
+body.capture-mode [contenteditable]{
+  border-bottom:none;
+  padding-bottom:0;
+}
+
+.client-row{
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  font-size:17px;
+  color:var(--cream-2);
+  margin-bottom:18px;
+}
+.client-row .label{ color:var(--cream-3); }
+.client-row [contenteditable]{
+  min-width:40px;
+  font-weight:600;
+  color:var(--cream);
+  padding:1px 4px;
+}
+.client-row [contenteditable]:empty:before{
+  content:attr(data-placeholder);
+  color:var(--cream-3);
+  font-weight:400;
+}
+
+/* ---------- Table ---------- */
+table.ship-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:17px;
+  margin-bottom:6px;
+}
+.ship-table thead th{
+  text-align:left;
+  font-size:13.5px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--cream-3);
+  font-weight:700;
+  padding:0 8px 8px;
+  border-bottom:1px solid var(--line);
+}
+.ship-table thead th.num, .ship-table td.num{ text-align:right; }
+.ship-table tbody td{
+  padding:8px 8px;
+  border-bottom:1px solid rgba(243,236,221,.06);
+  vertical-align:top;
+  color:var(--cream-2);
+}
+.ship-table tbody td.idx{ color:var(--cream-3); width:26px; }
+.ship-table tbody td.codigo{ width:140px; font-variant-numeric:tabular-nums; color:var(--cream-3); font-size:15px; }
+.ship-table tbody td.nombre{ color:var(--cream); font-weight:500; }
+.ship-table tbody td.peso-cell{ font-variant-numeric:tabular-nums; color:var(--accent); font-weight:700; width:70px; }
+.ship-table tbody td.cant-cell{ width:46px; font-variant-numeric:tabular-nums; }
+.ship-table tbody tr:last-child td{ border-bottom:none; }
+
+td.del-cell{ width:24px; padding:8px 0 8px 4px !important; }
+.del-row{
+  background:none;
+  border:none;
+  color:var(--cream-3);
+  font-size:15px;
+  line-height:1;
+  padding:2px 4px;
+  border-radius:6px;
+}
+.del-row:hover{ color:var(--danger); background:rgba(224,86,63,.1); }
+
+.table-actions{ margin:10px 0 20px; }
+
+.empty-state{
+  padding:26px 8px;
+  text-align:center;
+  color:var(--cream-3);
+  font-size:13px;
+  border:1px dashed var(--line);
+  border-radius:12px;
+  margin-bottom:16px;
+}
+
+/* ---------- Modal de confirmación ---------- */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+.modal-overlay[hidden]{ display:none; }
+.modal-box{
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px 24px 20px;
+  max-width:340px;
+  width:100%;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.7);
+}
+.modal-box p{
+  margin:0 0 18px;
+  font-size:14px;
+  color:var(--cream-2);
+  line-height:1.5;
+}
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.history-box{
+  max-width:480px;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+}
+.history-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+.history-header h3{
+  margin:0;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:16px;
+  color:var(--cream);
+}
+.btn-close{
+  background:none;
+  border:none;
+  color:var(--cream-3);
+  font-size:20px;
+  line-height:1;
+  cursor:pointer;
+  padding:2px 6px;
+  border-radius:6px;
+}
+.btn-close:hover{ color:var(--cream); background:rgba(243,236,221,.08); }
+
+.history-list{
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:16px;
+}
+.history-empty{
+  padding:30px 10px;
+  text-align:center;
+  color:var(--cream-3);
+  font-size:13px;
+}
+.history-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px;
+  background:var(--bg-3);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+.history-item-info{ min-width:0; }
+.history-item-client{
+  font-weight:700;
+  color:var(--cream);
+  font-size:13.5px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.history-item-meta{
+  font-size:11.5px;
+  color:var(--cream-3);
+  margin-top:2px;
+}
+.history-item-total{
+  font-weight:700;
+  color:var(--accent);
+  font-size:14px;
+  white-space:nowrap;
+}
+.history-item-actions{
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+/* ---------- Summary ---------- */
+.summary{
+  border-top:1px solid var(--line);
+  padding-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:17.5px;
+  color:var(--cream-2);
+}
+.summary-row .row-label{
+  font-size:17px;
+  color:var(--cream-3);
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.summary-row .val{
+  font-variant-numeric:tabular-nums;
+  color:var(--cream);
+  font-weight:600;
+}
+.summary-row .val [contenteditable]{ padding:1px 4px; }
+
+.pickup-row{ align-items:center; }
+.pickup-toggle-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:17px;
+  color:var(--cream-3);
+}
+.pickup-toggle-wrap input[type="checkbox"]{
+  accent-color:var(--accent);
+  width:15px;height:15px;
+}
+.pickup-detail{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-left:auto;
+}
+.pickup-detail[hidden]{ display:none; }
+.pickup-detail .val{ display:flex; align-items:center; gap:4px; }
+
+.summary-row.total-row{
+  margin-top:4px;
+  padding:22px 24px;
+  background:var(--accent-grad);
+  border-radius:12px;
+  color:#1a1006;
+}
+.summary-row.total-row .label{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:18px;
+  letter-spacing:.02em;
+  color:#1a1006;
+}
+.summary-row.total-row .val{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:26px;
+  font-weight:700;
+  color:#1a1006;
+}
+
+.card-footer-note{
+  margin-top:18px;
+  text-align:center;
+  font-size:13px;
+  color:var(--cream-3);
+  letter-spacing:.03em;
+}
+
+/* ---------- Floating capture toggle ---------- */
+.capture-fab{
+  position:fixed;
+  top:18px;
+  right:18px;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:8px 14px 8px 8px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+.capture-fab .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--cream-3);
+}
+.capture-fab.active .dot{ background:var(--accent); box-shadow:0 0 8px var(--accent); }
+.capture-fab button{
+  background:none;border:none;color:var(--cream-2);font-size:12px;font-weight:700;
+}
+
+/* ---------- Capture mode ---------- */
+body.capture-mode .no-capture{ display:none !important; }
+body.capture-mode .app-shell{ gap:0; }
+
+@media (max-width:480px){
+  .card{ padding:22px 18px 20px; }
+  .brand img{ height:24px; }
+  .brand-text{ font-size:16px; }
+  .ship-table{ font-size:12px; }
+}
+</style>
+</head>
+<body>
+
+  <div class="capture-fab" id="capture-fab">
+    <span class="dot"></span>
+    <button id="capture-toggle">Modo captura</button>
+  </div>
+
+  <div class="app-shell">
+
+    <header class="page-header no-capture">
+      <img src="assets/astra-logo.webp" alt="ASTRA" class="page-header-logo">
+    </header>
+
+    <!-- Paso 1: pegar datos -->
+    <div class="toolbar no-capture">
+      <h2><span class="step">1</span> Pega los datos del courier</h2>
+      <p class="hint">Copia las filas de tu Excel (código, nombre, cantidad, peso) y pégalas aquí. También puedes agregar o editar filas a mano después.</p>
+      <textarea id="paste-area" autocomplete="off" spellcheck="false" placeholder="511010100001	CRISTIANO RONALDO DOS SANTOS AVEIRO	1	2.45
+511010100002	LIONEL ANDRES MESSI CUCCITTINI	1	2.45"></textarea>
+      <div class="row-actions">
+        <button class="btn btn-primary" id="process-paste">Procesar y agregar filas</button>
+        <button class="btn btn-ghost" id="add-row">+ Agregar fila manual</button>
+      </div>
+    </div>
+
+    <!-- La liquidación (esto es lo que se exporta) -->
+    <div class="card" id="liquidacion-card">
+      <div class="card-header">
+        <div class="brand">
+          <img src="assets/astra-star-mark.webp" alt="ASTRA">
+          <span class="brand-text">ASTRA</span>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-title">Liquidación de Envío</div>
+          <div class="fecha-row">Fecha: <span id="fecha" contenteditable="true"></span></div>
+        </div>
+      </div>
+
+      <div class="client-row">
+        <span class="label">Cliente:</span>
+        <span id="cliente" contenteditable="true" data-placeholder="Nombre del cliente (opcional)"></span>
+      </div>
+
+      <table class="ship-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>N&deg; Gu&iacute;a</th>
+            <th>Consignatario</th>
+            <th class="num">Cant.</th>
+            <th class="num">Peso&nbsp;(kg)</th>
+            <th class="no-capture"></th>
+          </tr>
+        </thead>
+        <tbody id="rows-body"></tbody>
+      </table>
+
+      <div class="empty-state no-capture" id="empty-state">
+        Aún no hay filas. Pega los datos arriba o agrega una fila manual.
+      </div>
+
+      <div class="summary">
+        <div class="summary-row">
+          <span class="row-label">Peso Total</span>
+          <span class="val"><span id="total-peso">0.00</span>&nbsp;kg</span>
+        </div>
+
+        <div class="summary-row">
+          <span class="row-label">Precio por Kg</span>
+          <span class="val">$<span id="rate" contenteditable="true">10.00</span></span>
+        </div>
+
+        <div class="summary-row">
+          <span class="row-label">Subtotal</span>
+          <span class="val">$<span id="subtotal">0.00</span></span>
+        </div>
+
+        <div class="summary-row repack-row">
+          <label class="pickup-toggle-wrap no-capture">
+            <input type="checkbox" id="repack-toggle">
+            Incluir Reempaque
+          </label>
+          <span class="pickup-detail" id="repack-detail" hidden>
+            <span id="repack-qty" contenteditable="true">20</span>&nbsp;caja(s)&nbsp;×&nbsp;$<span id="repack-price" contenteditable="true">0.50</span>
+            &nbsp;=&nbsp;<span class="val">$<span id="repack-amount">0.00</span></span>
+          </span>
+        </div>
+
+        <div class="summary-row pickup-row">
+          <label class="pickup-toggle-wrap no-capture">
+            <input type="checkbox" id="pickup-toggle">
+            Incluir Pick up
+          </label>
+          <span class="pickup-detail" id="pickup-detail" hidden>
+            <span id="pickup-label" contenteditable="true">Pick up</span>
+            <span class="val">$<span id="pickup-amount" contenteditable="true">5.00</span></span>
+          </span>
+        </div>
+
+        <div class="summary-row total-row">
+          <span class="label">TOTAL</span>
+          <span class="val">$<span id="total-final">0.00</span></span>
+        </div>
+      </div>
+
+      <div class="card-footer-note">ASTRA · Liquidación generada digitalmente</div>
+    </div>
+
+    <!-- Paso 2: acciones -->
+    <div class="toolbar no-capture">
+      <h2><span class="step">2</span> Exportar y reiniciar</h2>
+      <div class="row-actions">
+        <button class="btn btn-primary" id="download-pdf">Descargar PDF</button>
+        <button class="btn btn-ghost" id="download-png">Descargar PNG</button>
+        <button class="btn btn-ghost" id="open-history">🕒 Historial</button>
+        <button class="btn btn-danger-ghost" id="clear-all">↺ Reset (nueva liquidación)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="history-modal" hidden>
+    <div class="modal-box history-box">
+      <div class="history-header">
+        <h3>Historial de liquidaciones</h3>
+        <button class="btn-close" id="history-close" aria-label="Cerrar">×</button>
+      </div>
+      <div id="history-list" class="history-list"></div>
+      <div class="modal-actions">
+        <button class="btn btn-danger-ghost" id="history-clear">Borrar historial</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="confirm-modal" hidden>
+    <div class="modal-box">
+      <p id="confirm-message">¿Iniciar una nueva liquidación? Se borrarán los datos actuales.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="confirm-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="confirm-accept">Sí, borrar todo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="script.js?v=10"></script>
+</body>
+</html>
